@@ -1,0 +1,2610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COSMOS — Portal Astronómico</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg: #030510;
+  --bg2: #060c1f;
+  --panel: rgba(6,14,40,0.92);
+  --border: rgba(80,160,255,0.25);
+  --accent: #4fc3f7;
+  --accent2: #a78bfa;
+  --accent3: #f59e0b;
+  --text: #c8e0ff;
+  --text2: #7ba7d4;
+  --danger: #ff4d6d;
+  --success: #34d399;
+  --glow: 0 0 18px rgba(79,195,247,0.5);
+  --glow2: 0 0 18px rgba(167,139,250,0.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  overflow-x: hidden;
+}
+
+/* STARS BACKGROUND */
+#stars-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+.page { position: relative; z-index: 1; }
+
+/* VISITS COUNTER */
+#visit-counter {
+  position: fixed; top: 14px; right: 18px;
+  background: rgba(6,14,40,0.85);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+}
+
+/* ===== LOGIN SCREEN ===== */
+#login-screen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% 40%, #0a1a3a 0%, #030510 70%);
+}
+
+.login-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 50px 44px 44px;
+  width: 420px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 60px rgba(79,195,247,0.12), 0 0 0 1px rgba(79,195,247,0.08);
+  animation: fadeIn 0.8s ease;
+}
+
+.logo-title {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.logo-title h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.logo-title p {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text2);
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.login-tabs {
+  display: flex; gap: 0;
+  margin-bottom: 28px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.login-tab {
+  flex: 1; padding: 10px;
+  background: transparent;
+  border: none; cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--text2);
+  transition: all 0.3s;
+}
+
+.login-tab.active {
+  background: linear-gradient(135deg, rgba(79,195,247,0.25), rgba(167,139,250,0.2));
+  color: var(--accent);
+}
+
+.form-group { margin-bottom: 18px; position: relative; }
+
+.form-group label {
+  display: block;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--text2);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.form-group input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 18px;
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.form-group input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+  background: rgba(79,195,247,0.05);
+}
+
+.form-group input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 14px rgba(255,77,109,0.35);
+  animation: shake 0.4s;
+}
+
+.error-msg {
+  color: var(--danger);
+  font-size: 11px;
+  margin-top: 6px;
+  display: none;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #1e5a8a, #3b1fa8);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px; letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 8px;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2a7aaf, #5427d0);
+  box-shadow: var(--glow);
+  transform: translateY(-2px);
+}
+
+/* ===== MAIN APP ===== */
+#app { display: none; min-height: 100vh; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(3,5,16,0.92);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  padding: 0 30px;
+  display: flex; align-items: center; gap: 0;
+  height: 64px;
+}
+
+.nav-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px; font-weight: 900;
+  letter-spacing: 5px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-right: 30px;
+}
+
+.nav-links { display: flex; gap: 2px; flex: 1; }
+
+.nav-btn {
+  background: none; border: none;
+  padding: 8px 16px;
+  color: var(--text2);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px; letter-spacing: 1px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.nav-btn::after {
+  content: '';
+  position: absolute; bottom: 4px; left: 16px; right: 16px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+
+.nav-btn.active, .nav-btn:hover { color: var(--accent); }
+.nav-btn.active::after, .nav-btn:hover::after { transform: scaleX(1); }
+
+.nav-user {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 12px; color: var(--text2);
+}
+
+.nav-user span { color: var(--accent); font-family: 'Share Tech Mono', monospace; }
+
+.btn-logout {
+  background: rgba(255,77,109,0.15);
+  border: 1px solid rgba(255,77,109,0.4);
+  color: var(--danger);
+  padding: 6px 14px; border-radius: 8px;
+  cursor: pointer; font-size: 12px;
+  transition: all 0.2s;
+}
+.btn-logout:hover { background: rgba(255,77,109,0.3); }
+
+/* SECTIONS */
+.section { display: none; padding: 40px 40px 60px; animation: fadeIn 0.5s ease; }
+.section.active { display: block; }
+
+/* HERO BANNER */
+.hero {
+  background: radial-gradient(ellipse at 50% 0%, rgba(79,195,247,0.1) 0%, transparent 70%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 50px 40px;
+  text-align: center;
+  margin-bottom: 36px;
+  position: relative; overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234fc3f7' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hero h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 36px; font-weight: 900;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #fff, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 14px;
+}
+
+.hero p { color: var(--text2); font-size: 16px; line-height: 1.7; max-width: 600px; margin: 0 auto; }
+
+/* CARDS GRID */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 26px;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover { transform: translateY(-4px); border-color: rgba(79,195,247,0.5); box-shadow: var(--glow); }
+.card:hover::before { opacity: 1; }
+
+.card-icon { font-size: 36px; margin-bottom: 14px; }
+.card h3 { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; }
+.card p { color: var(--text2); font-size: 14px; line-height: 1.7; }
+
+/* SECTION HEADERS */
+.sec-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px; letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 30px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+
+/* EVENTS */
+.event-list { display: flex; flex-direction: column; gap: 14px; }
+
+.event-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex; gap: 20px; align-items: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.event-item:hover { border-color: rgba(167,139,250,0.6); box-shadow: var(--glow2); transform: translateX(4px); }
+
+.event-date {
+  min-width: 90px;
+  background: rgba(167,139,250,0.1);
+  border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 10px;
+  text-align: center;
+  padding: 10px 8px;
+}
+
+.event-date .day { font-family: 'Orbitron', sans-serif; font-size: 24px; color: var(--accent2); }
+.event-date .month { font-size: 11px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; }
+.event-info h4 { font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
+.event-info p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.event-badge {
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px; letter-spacing: 1px;
+  font-family: 'Share Tech Mono', monospace;
+}
+.badge-upcoming { background: rgba(79,195,247,0.15); border: 1px solid var(--accent); color: var(--accent); }
+.badge-rare { background: rgba(245,158,11,0.15); border: 1px solid var(--accent3); color: var(--accent3); }
+.badge-monthly { background: rgba(52,211,153,0.15); border: 1px solid var(--success); color: var(--success); }
+
+/* ===== QUIZ ===== */
+.quiz-container { max-width: 700px; margin: 0 auto; }
+
+.quiz-progress {
+  display: flex; gap: 8px; margin-bottom: 30px;
+}
+.quiz-dot {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: var(--border);
+  transition: background 0.4s;
+}
+.quiz-dot.done { background: var(--success); }
+.quiz-dot.active { background: var(--accent); }
+
+.quiz-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px;
+  animation: fadeIn 0.4s ease;
+}
+
+.quiz-card .q-num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--text2); margin-bottom: 12px;
+}
+
+.quiz-card .q-text {
+  font-size: 20px; font-weight: 600;
+  color: var(--text); margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.quiz-opt {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font-size: 14px; color: var(--text);
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.quiz-opt:hover { border-color: var(--accent); background: rgba(79,195,247,0.08); }
+.quiz-opt.correct { background: rgba(52,211,153,0.15); border-color: var(--success); color: var(--success); }
+.quiz-opt.wrong { background: rgba(255,77,109,0.12); border-color: var(--danger); color: var(--danger); }
+.quiz-opt.disabled { pointer-events: none; opacity: 0.6; }
+
+.quiz-feedback {
+  margin-top: 18px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  display: none;
+}
+.quiz-feedback.show { display: block; animation: fadeIn 0.3s; }
+.quiz-feedback.correct-fb { background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.4); color: var(--success); }
+.quiz-feedback.wrong-fb { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3); color: var(--danger); }
+
+.quiz-next-btn {
+  margin-top: 22px;
+  background: linear-gradient(135deg, rgba(79,195,247,0.2), rgba(167,139,250,0.2));
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 28px;
+  color: var(--accent);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px; letter-spacing: 2px;
+  cursor: pointer; transition: all 0.2s;
+  display: none;
+}
+.quiz-next-btn:hover { box-shadow: var(--glow); transform: translateY(-2px); }
+
+.score-display {
+  text-align: center;
+  padding: 30px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.score-display h3 { font-family: 'Orbitron', sans-serif; font-size: 24px; letter-spacing: 3px; margin-bottom: 14px; }
+.score-num { font-family: 'Orbitron', sans-serif; font-size: 60px; font-weight: 900;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* GAME LOCKED */
+.game-locked {
+  text-align: center;
+  padding: 60px;
+  background: var(--panel);
+  border: 2px dashed var(--border);
+  border-radius: 20px;
+}
+.game-locked .lock-icon { font-size: 60px; margin-bottom: 20px; filter: grayscale(1); opacity: 0.5; }
+.game-locked h3 { font-family: 'Orbitron', sans-serif; font-size: 18px; letter-spacing: 3px; color: var(--text2); margin-bottom: 10px; }
+.game-locked p { color: var(--text2); font-size: 14px; }
+
+/* ===== PLANET GAME ===== */
+#planet-game-container {
+  background: #000510;
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+#planet-game-canvas {
+  display: block;
+  width: 100%; height: 460px;
+  cursor: none;
+}
+
+.game-hud {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: 14px 20px;
+  display: flex; gap: 20px; align-items: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.hud-item {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px; color: var(--accent);
+}
+
+.hud-lives { display: flex; gap: 4px; }
+.hud-lives span { font-size: 16px; }
+
+/* ===== SHOP ===== */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+.product-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.product-card:hover { transform: translateY(-4px); box-shadow: var(--glow); border-color: rgba(79,195,247,0.5); }
+
+.product-img {
+  height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 70px;
+  background: radial-gradient(ellipse at center, rgba(79,195,247,0.08) 0%, transparent 70%);
+  border-bottom: 1px solid var(--border);
+}
+
+.product-info { padding: 18px; }
+.product-info h4 { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1px; color: var(--text); margin-bottom: 8px; }
+.product-info p { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 14px; }
+
+.product-footer { display: flex; align-items: center; justify-content: space-between; }
+.price { font-family: 'Orbitron', sans-serif; font-size: 18px; color: var(--accent3); }
+.price span { font-size: 11px; color: var(--text2); }
+
+.btn-add {
+  background: linear-gradient(135deg, rgba(79,195,247,0.2), rgba(167,139,250,0.15));
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--accent);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-add:hover { background: rgba(79,195,247,0.3); box-shadow: var(--glow); }
+
+/* CART */
+.cart-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 30px;
+}
+
+.cart-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.cart-item .ci-name { color: var(--text); flex: 1; }
+.cart-item .ci-qty {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text2);
+}
+.ci-qty button {
+  width: 26px; height: 26px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer; font-size: 14px;
+  transition: all 0.2s;
+}
+.ci-qty button:hover { border-color: var(--accent); color: var(--accent); }
+
+.cart-item .ci-price { color: var(--accent3); font-family: 'Share Tech Mono', monospace; min-width: 80px; text-align: right; }
+
+/* CHECKOUT FORM */
+.checkout-form {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  margin-top: 20px;
+}
+
+.checkout-form .full { grid-column: 1/-1; }
+
+.checkout-form input, .checkout-form select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.checkout-form input:focus, .checkout-form select:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.checkout-form label {
+  font-size: 11px; letter-spacing: 1px;
+  color: var(--text2);
+  display: block; margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+/* TICKET */
+.ticket {
+  background: #020a20;
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  padding: 36px;
+  max-width: 560px;
+  margin: 30px auto 0;
+  position: relative;
+  animation: fadeIn 0.6s ease;
+}
+
+.ticket::before {
+  content: '★ COSMOS ★';
+  position: absolute; top: -10px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  padding: 0 14px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px; letter-spacing: 3px;
+  color: var(--accent);
+}
+
+.ticket-id {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 28px;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 6px;
+}
+.ticket-date { text-align: center; font-size: 12px; color: var(--text2); margin-bottom: 24px; }
+
+.ticket-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(79,195,247,0.15);
+  font-size: 14px;
+}
+.ticket-row .label { color: var(--text2); }
+.ticket-row .val { color: var(--text); font-family: 'Share Tech Mono', monospace; }
+
+.ticket-total {
+  display: flex; justify-content: space-between;
+  margin-top: 16px; padding-top: 16px;
+  border-top: 2px solid var(--accent);
+}
+.ticket-total .label { font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 2px; color: var(--accent2); }
+.ticket-total .val { font-family: 'Orbitron', sans-serif; font-size: 22px; color: var(--accent3); }
+
+.ticket-status {
+  text-align: center; margin-top: 20px;
+  padding: 10px;
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.3);
+  border-radius: 8px;
+  color: var(--success);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; letter-spacing: 2px;
+}
+
+/* ===== ADMIN ===== */
+.admin-grid { display: grid; grid-template-columns: 250px 1fr; gap: 24px; }
+
+.admin-sidebar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  height: fit-content;
+  position: sticky; top: 80px;
+}
+
+.admin-sidebar h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px; letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px; color: var(--text2);
+  transition: all 0.2s;
+  margin-bottom: 4px;
+}
+
+.admin-menu-item:hover, .admin-menu-item.active {
+  background: rgba(79,195,247,0.1);
+  color: var(--accent);
+}
+
+.admin-panel { display: none; animation: fadeIn 0.3s; }
+.admin-panel.active { display: block; }
+
+.admin-form {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.admin-form h4 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px; letter-spacing: 2px;
+  color: var(--accent2);
+  margin-bottom: 20px;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-row.full { grid-template-columns: 1fr; }
+
+.admin-input, .admin-textarea, .admin-select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 15px;
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.admin-input:focus, .admin-textarea:focus, .admin-select:focus {
+  border-color: var(--accent); box-shadow: var(--glow);
+}
+
+.admin-textarea { min-height: 100px; resize: vertical; }
+
+.admin-input::placeholder, .admin-textarea::placeholder { color: rgba(120,160,200,0.4); }
+
+.btn-admin {
+  background: linear-gradient(135deg, rgba(167,139,250,0.25), rgba(79,195,247,0.15));
+  border: 1px solid var(--accent2);
+  border-radius: 10px;
+  padding: 11px 24px;
+  color: var(--accent2);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing: 2px;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.btn-admin:hover { box-shadow: var(--glow2); transform: translateY(-2px); }
+
+/* DELIVERIES TABLE */
+.deliveries-table {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.deliveries-table table { width: 100%; border-collapse: collapse; }
+
+.deliveries-table th {
+  background: rgba(79,195,247,0.08);
+  padding: 14px 18px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--accent);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.deliveries-table td {
+  padding: 14px 18px;
+  font-size: 13px; color: var(--text2);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.deliveries-table tr:hover td { background: rgba(79,195,247,0.03); }
+
+.status-tag {
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 10px; letter-spacing: 1px;
+  font-family: 'Share Tech Mono', monospace;
+}
+.st-pending { background: rgba(245,158,11,0.15); border: 1px solid var(--accent3); color: var(--accent3); }
+.st-sent { background: rgba(79,195,247,0.15); border: 1px solid var(--accent); color: var(--accent); }
+.st-delivered { background: rgba(52,211,153,0.15); border: 1px solid var(--success); color: var(--success); }
+
+.btn-status {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: var(--text2);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-status:hover { border-color: var(--accent); color: var(--accent); }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 10000;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.show { display: flex; animation: fadeIn 0.3s; }
+
+.modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 500px; width: 90%;
+  text-align: center;
+  animation: scaleIn 0.3s ease;
+}
+
+.modal-box h3 { font-family: 'Orbitron', sans-serif; font-size: 20px; letter-spacing: 3px; color: var(--accent); margin-bottom: 14px; }
+.modal-box p { color: var(--text2); line-height: 1.7; margin-bottom: 24px; }
+
+.modal-btns { display: flex; gap: 12px; justify-content: center; }
+
+.btn-modal {
+  padding: 11px 28px;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing: 2px;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-modal-primary { background: linear-gradient(135deg, rgba(79,195,247,0.3), rgba(167,139,250,0.3)); border: 1px solid var(--accent); color: var(--accent); }
+.btn-modal-secondary { background: none; border: 1px solid var(--border); color: var(--text2); }
+.btn-modal:hover { transform: translateY(-2px); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 13px; color: var(--text);
+  z-index: 99999;
+  display: none;
+  animation: slideUp 0.3s ease;
+  backdrop-filter: blur(10px);
+  max-width: 320px;
+}
+.toast.show { display: block; }
+.toast.success-toast { border-color: rgba(52,211,153,0.5); }
+.toast.error-toast { border-color: rgba(255,77,109,0.5); }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+@keyframes orbit { from { transform: rotate(0deg) translateX(var(--r)) rotate(0deg); } to { transform: rotate(360deg) translateX(var(--r)) rotate(-360deg); } }
+
+/* FLOATING PLANETS DECORATION */
+.planet-deco {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.06;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* TABS */
+.tabs-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.tab-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 18px;
+  color: var(--text2);
+  font-size: 12px; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.2s;
+}
+.tab-btn.active, .tab-btn:hover { background: rgba(79,195,247,0.12); border-color: var(--accent); color: var(--accent); }
+
+/* INFO ARTICLES */
+.info-article {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+.info-article:hover { border-color: rgba(79,195,247,0.4); }
+.info-article h3 { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.info-article p { color: var(--text2); font-size: 14px; line-height: 1.8; }
+.info-article .tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--accent2); letter-spacing: 1px; }
+.info-article .read-more {
+  margin-top: 14px;
+  color: var(--accent);
+  font-size: 12px; letter-spacing: 1px;
+  cursor: pointer;
+  background: none; border: none;
+  padding: 0;
+  transition: all 0.2s;
+}
+.info-article .read-more:hover { text-decoration: underline; }
+.info-article .full-content { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.info-article .full-content.open { display: block; animation: fadeIn 0.3s; }
+
+/* SEARCH BAR */
+.search-bar {
+  display: flex; gap: 10px; margin-bottom: 24px;
+}
+.search-input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+.search-input:focus { border-color: var(--accent); box-shadow: var(--glow); }
+.search-input::placeholder { color: rgba(120,160,200,0.4); }
+
+/* GAME OVER SCREEN */
+.game-over-screen {
+  position: absolute; inset: 0;
+  background: rgba(3,5,16,0.9);
+  display: none;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 100;
+}
+.game-over-screen.show { display: flex; animation: fadeIn 0.5s; }
+.game-over-screen h2 { font-family: 'Orbitron', sans-serif; font-size: 36px; letter-spacing: 5px; }
+.game-over-screen p { color: var(--text2); font-size: 16px; }
+
+/* PLANET ORBIT VISUAL */
+.solar-system-mini {
+  position: relative; width: 100%; height: 300px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.sun { width: 50px; height: 50px; border-radius: 50%;
+  background: radial-gradient(circle, #fff176, #f59e0b, #b45309);
+  box-shadow: 0 0 30px rgba(245,158,11,0.8);
+  position: absolute;
+}
+
+.orbit-ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.planet-orb {
+  width: 16px; height: 16px; border-radius: 50%;
+  position: absolute;
+  animation: orbit linear infinite;
+}
+
+.admin-stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+}
+.stat-card .stat-val { font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--accent); }
+.stat-card .stat-label { font-size: 11px; color: var(--text2); letter-spacing: 1px; margin-top: 4px; }
+
+/* CART BADGE */
+.cart-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--danger);
+  color: #fff;
+  border-radius: 50%; width: 18px; height: 18px;
+  font-size: 10px; font-weight: bold;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* NOTIFICATION DOT */
+.notif-dot {
+  display: inline-block; width: 7px; height: 7px;
+  background: var(--danger); border-radius: 50%;
+  margin-left: 4px; vertical-align: middle;
+  animation: pulse 2s infinite;
+}
+
+/* ===== GAME STYLES ===== */
+#asteroid-canvas { cursor: none; }
+
+/* USER PROFILE PANEL */
+.profile-panel {
+  display: grid; grid-template-columns: 200px 1fr; gap: 24px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.profile-avatar {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,195,247,0.3), rgba(167,139,250,0.2));
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 50px;
+  margin: 0 auto;
+}
+.profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.pstat { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+.pstat .val { font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--accent); }
+.pstat .lbl { font-size: 10px; color: var(--text2); letter-spacing: 1px; }
+
+/* FAVORITES */
+.fav-btn { background: none; border: none; font-size: 18px; cursor: pointer; transition: transform 0.2s; }
+.fav-btn:hover { transform: scale(1.3); }
+
+/* CATEGORY FILTER */
+.filter-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+.chip.active { background: rgba(79,195,247,0.15); border-color: var(--accent); color: var(--accent); }
+
+/* SHARE / PRINT TICKET BTN */
+.btn-outline {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 22px;
+  color: var(--text2);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing: 2px;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div id="visit-counter">👁 VISITAS: <span id="visit-count">0</span></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box" id="modal-box">
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+    <div class="modal-btns">
+      <button class="btn-modal btn-modal-primary" id="modal-ok">ACEPTAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="login-screen" class="page">
+  <div class="login-box">
+    <div class="logo-title">
+      <h1>COSMOS</h1>
+      <p>Portal de Astronomía Interactivo</p>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="setLoginTab('user')">🌟 USUARIO</button>
+      <button class="login-tab" onclick="setLoginTab('admin')">⚙️ ADMIN</button>
+    </div>
+    <div id="login-form">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" id="login-user" placeholder="Ingresa tu usuario" autocomplete="off" oninput="clearFieldError('login-user')">
+        <div class="error-msg" id="err-user">⚠ Usuario incorrecto</div>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" oninput="clearFieldError('login-pass')" onkeydown="if(event.key==='Enter') doLogin()">
+        <div class="error-msg" id="err-pass">⚠ Contraseña incorrecta</div>
+      </div>
+      <div class="error-msg" id="err-general" style="display:none; text-align:center; margin-bottom:10px; font-size:13px;">🚫 Credenciales inválidas. Acceso denegado.</div>
+      <button class="btn-primary" onclick="doLogin()">INICIAR SESIÓN →</button>
+    </div>
+    <div style="margin-top:18px; text-align:center;">
+      <p style="font-size:11px; color:var(--text2);">Usuario: <code style="color:var(--accent)">cosmos / cosmos123</code></p>
+      <p style="font-size:11px; color:var(--text2);">Admin: <code style="color:var(--accent2)">admin / admin2024</code></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app" class="page">
+  <nav>
+    <div class="nav-logo">✦ COSMOS</div>
+    <div class="nav-links" id="nav-links">
+      <button class="nav-btn active" onclick="showSection('home')">🏠 Inicio</button>
+      <button class="nav-btn" onclick="showSection('info')">📚 Información</button>
+      <button class="nav-btn" onclick="showSection('events')">🗓 Eventos</button>
+      <button class="nav-btn" onclick="showSection('quiz')">🎯 Quiz</button>
+      <button class="nav-btn" id="game-nav-btn" onclick="showSection('game')" style="display:none">🎮 Juego</button>
+      <button class="nav-btn" onclick="showSection('shop')">🛒 Tienda <span id="cart-badge-nav" class="cart-badge" style="display:none">0</span></button>
+      <button class="nav-btn admin-only" onclick="showSection('admin')" style="display:none">⚙️ Admin <span class="notif-dot"></span></button>
+    </div>
+    <div class="nav-user">
+      Hola, <span id="welcome-name">usuario</span>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </nav>
+
+  <!-- HOME -->
+  <div class="section active" id="sec-home">
+    <div class="hero">
+      <h2>BIENVENIDO AL COSMOS</h2>
+      <p>Explora el universo desde tu pantalla. Aprende sobre astronomía, sigue los próximos eventos celestes, responde preguntas y desbloquea el juego de planetas.</p>
+    </div>
+    <div class="solar-system-mini" id="solar-mini">
+      <div class="sun"></div>
+    </div>
+    <div class="cards-grid" style="margin-top:20px;">
+      <div class="card" onclick="showSection('info')">
+        <div class="card-icon">📚</div>
+        <h3>INFORMACIÓN</h3>
+        <p>Explora artículos sobre planetas, galaxias, agujeros negros y mucho más del universo.</p>
+      </div>
+      <div class="card" onclick="showSection('events')">
+        <div class="card-icon">🌌</div>
+        <h3>EVENTOS</h3>
+        <p>No te pierdas eclipses, lluvias de meteoritos y conjunciones planetarias próximas.</p>
+      </div>
+      <div class="card" onclick="showSection('quiz')">
+        <div class="card-icon">🎯</div>
+        <h3>QUIZ</h3>
+        <p>Responde 4 preguntas correctamente y desbloquea nuestro juego de asteroides.</p>
+      </div>
+      <div class="card" onclick="showSection('shop')">
+        <div class="card-icon">🔭</div>
+        <h3>TIENDA</h3>
+        <p>Telescopios, libros, mapas estelares y accesorios para todo astrónomo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="section" id="sec-info">
+    <div class="sec-title">📚 BIBLIOTECA ASTRONÓMICA</div>
+    <div class="search-bar">
+      <input type="text" class="search-input" id="info-search" placeholder="🔍 Buscar artículos..." oninput="filterArticles()">
+    </div>
+    <div class="filter-chips" id="info-filters">
+      <span class="chip active" onclick="filterChip(this,'all')">Todos</span>
+      <span class="chip" onclick="filterChip(this,'planeta')">Planetas</span>
+      <span class="chip" onclick="filterChip(this,'galaxia')">Galaxias</span>
+      <span class="chip" onclick="filterChip(this,'fenomeno')">Fenómenos</span>
+      <span class="chip" onclick="filterChip(this,'objeto')">Objetos</span>
+    </div>
+    <div id="articles-list"></div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="section" id="sec-events">
+    <div class="sec-title">🗓 EVENTOS ASTRONÓMICOS 2025</div>
+    <div class="tabs-row">
+      <button class="tab-btn active" onclick="filterEvents(this,'all')">Todos</button>
+      <button class="tab-btn" onclick="filterEvents(this,'eclipse')">Eclipses</button>
+      <button class="tab-btn" onclick="filterEvents(this,'meteor')">Meteoritos</button>
+      <button class="tab-btn" onclick="filterEvents(this,'planeta')">Planetas</button>
+      <button class="tab-btn" onclick="filterEvents(this,'luna')">Luna</button>
+    </div>
+    <div class="event-list" id="event-list"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="section" id="sec-quiz">
+    <div class="sec-title">🎯 QUIZ ESPACIAL</div>
+    <div class="quiz-container">
+      <div id="quiz-area"></div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="section" id="sec-game">
+    <div class="sec-title">🎮 DESTRUCTOR DE ASTEROIDES</div>
+    <p style="color:var(--text2); margin-bottom:20px; font-size:14px;">
+      🕹 Mueve tu nave con el <b>mouse</b> · Clic o <b>Espacio</b> para disparar · Destruye asteroides para ganar puntos · ¡Cuidado con los extra rápidos!
+    </p>
+    <div id="planet-game-container" style="position:relative;">
+      <canvas id="planet-game-canvas" width="900" height="480"></canvas>
+      <div class="game-hud">
+        <div class="hud-item">⭐ <span id="g-score">0</span></div>
+        <div class="hud-item">🌊 NIVEL <span id="g-level">1</span></div>
+        <div class="hud-item">❤️ <span id="g-lives-text">3</span></div>
+        <div class="hud-item" style="margin-left:auto; font-size:11px; color:var(--text2);">RECORD: <span id="g-best">0</span></div>
+      </div>
+      <div class="game-over-screen" id="game-over">
+        <h2 style="color:var(--danger)">GAME OVER</h2>
+        <p>Puntaje final: <span id="final-score" style="color:var(--accent); font-family:'Orbitron',sans-serif;"></span></p>
+        <button class="btn-primary" style="width:200px; margin-top:10px;" onclick="startGame()">▶ REINICIAR</button>
+      </div>
+      <div class="game-over-screen" id="game-win">
+        <h2 style="color:var(--success)">¡NIVEL COMPLETADO!</h2>
+        <p>Preparando siguiente oleada...</p>
+      </div>
+    </div>
+    <div id="game-locked-msg" style="display:none;">
+      <div class="game-locked">
+        <div class="lock-icon">🔒</div>
+        <h3>JUEGO BLOQUEADO</h3>
+        <p>Debes responder correctamente al menos <b style="color:var(--accent)">4 preguntas</b> del Quiz para desbloquear este juego.</p>
+        <button class="btn-primary" style="width:200px; margin:20px auto 0;" onclick="showSection('quiz')">IR AL QUIZ →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="section" id="sec-shop">
+    <div class="sec-title">🛒 TIENDA COSMOS</div>
+    <div id="shop-view">
+      <div class="filter-chips" id="shop-filters">
+        <span class="chip active" onclick="filterShop(this,'all')">Todos</span>
+        <span class="chip" onclick="filterShop(this,'telescopio')">Telescopios</span>
+        <span class="chip" onclick="filterShop(this,'libro')">Libros</span>
+        <span class="chip" onclick="filterShop(this,'accesorio')">Accesorios</span>
+      </div>
+      <div class="shop-grid" id="products-grid"></div>
+
+      <!-- CART -->
+      <div class="cart-panel" id="cart-panel" style="display:none;">
+        <div class="sec-title" style="font-size:16px;">🛒 TU CARRITO</div>
+        <div id="cart-items-list"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding-top:18px; border-top: 1px solid var(--border);">
+          <div style="font-family:'Orbitron',sans-serif; font-size:20px; color:var(--accent3);">
+            TOTAL: $<span id="cart-total">0</span>
+          </div>
+          <button class="btn-primary" style="width:200px;" onclick="showCheckout()">COMPRAR AHORA →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKOUT FORM -->
+    <div id="checkout-view" style="display:none;">
+      <div class="sec-title" style="font-size:16px;">📋 DATOS DE ENTREGA</div>
+      <div class="admin-form">
+        <div class="checkout-form">
+          <div>
+            <label>Nombre completo</label>
+            <input type="text" id="ch-name" class="admin-input" placeholder="Ana García">
+          </div>
+          <div>
+            <label>Teléfono</label>
+            <input type="text" id="ch-phone" class="admin-input" placeholder="+593 99 123 4567">
+          </div>
+          <div class="full">
+            <label>Dirección de entrega</label>
+            <input type="text" id="ch-address" class="admin-input" placeholder="Calle, número, ciudad">
+          </div>
+          <div>
+            <label>Ciudad</label>
+            <input type="text" id="ch-city" class="admin-input" placeholder="Quito">
+          </div>
+          <div>
+            <label>Código postal</label>
+            <input type="text" id="ch-zip" class="admin-input" placeholder="170101">
+          </div>
+          <div class="full">
+            <label>Correo electrónico</label>
+            <input type="email" id="ch-email" class="admin-input" placeholder="tucorreo@email.com">
+          </div>
+          <div>
+            <label>Método de pago</label>
+            <select id="ch-payment" class="admin-select">
+              <option value="efectivo">💵 Efectivo</option>
+              <option value="tarjeta">💳 Tarjeta</option>
+              <option value="transferencia">🏦 Transferencia</option>
+            </select>
+          </div>
+          <div>
+            <label>Notas adicionales</label>
+            <input type="text" id="ch-notes" class="admin-input" placeholder="(opcional)">
+          </div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:10px;">
+          <button class="btn-outline" onclick="document.getElementById('checkout-view').style.display='none'; document.getElementById('shop-view').style.display='block';">← VOLVER</button>
+          <button class="btn-primary" style="flex:1;" onclick="processOrder()">CONFIRMAR PEDIDO ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TICKET -->
+    <div id="ticket-view" style="display:none;"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="section" id="sec-admin">
+    <div class="sec-title">⚙️ PANEL DE ADMINISTRACIÓN</div>
+    <div class="admin-grid">
+      <div class="admin-sidebar">
+        <h3>MENÚ ADMIN</h3>
+        <div class="admin-menu-item active" onclick="showAdminPanel('dashboard')">📊 Dashboard</div>
+        <div class="admin-menu-item" onclick="showAdminPanel('add-info')">📝 Nueva Info</div>
+        <div class="admin-menu-item" onclick="showAdminPanel('add-event')">🗓 Nuevo Evento</div>
+        <div class="admin-menu-item" onclick="showAdminPanel('add-question')">❓ Nueva Pregunta</div>
+        <div class="admin-menu-item" onclick="showAdminPanel('add-product')">📦 Nuevo Producto</div>
+        <div class="admin-menu-item" onclick="showAdminPanel('deliveries')">🚚 Entregas <span id="delivery-count-badge" class="cart-badge" style="display:none">0</span></div>
+        <div class="admin-menu-item" onclick="showAdminPanel('manage-users')">👤 Usuarios</div>
+      </div>
+      <div>
+        <!-- DASHBOARD -->
+        <div class="admin-panel active" id="ap-dashboard">
+          <div class="admin-stats" id="admin-stats"></div>
+          <div class="admin-form">
+            <h4>⚡ ACTIVIDAD RECIENTE</h4>
+            <div id="activity-log" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text2); line-height:2;"></div>
+          </div>
+        </div>
+
+        <!-- ADD INFO -->
+        <div class="admin-panel" id="ap-add-info">
+          <div class="admin-form">
+            <h4>📝 AGREGAR ARTÍCULO DE INFORMACIÓN</h4>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">TÍTULO</label>
+                <input class="admin-input" id="ai-title" placeholder="Título del artículo">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">CATEGORÍA</label>
+                <select class="admin-select" id="ai-cat">
+                  <option value="planeta">🪐 Planetas</option>
+                  <option value="galaxia">🌌 Galaxias</option>
+                  <option value="fenomeno">✨ Fenómenos</option>
+                  <option value="objeto">🔭 Objetos</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">EMOJI / ÍCONO</label>
+                <input class="admin-input" id="ai-icon" placeholder="🌍" style="width:100px;">
+              </div>
+            </div>
+            <div class="form-row full" style="margin-top:8px;">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">RESUMEN</label>
+                <textarea class="admin-textarea" id="ai-summary" placeholder="Descripción breve..."></textarea>
+              </div>
+            </div>
+            <div class="form-row full" style="margin-top:8px;">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">CONTENIDO COMPLETO</label>
+                <textarea class="admin-textarea" id="ai-content" placeholder="Artículo completo..." style="min-height:140px;"></textarea>
+              </div>
+            </div>
+            <button class="btn-admin" onclick="addArticle()">+ PUBLICAR ARTÍCULO</button>
+          </div>
+        </div>
+
+        <!-- ADD EVENT -->
+        <div class="admin-panel" id="ap-add-event">
+          <div class="admin-form">
+            <h4>🗓 AGREGAR EVENTO ASTRONÓMICO</h4>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">NOMBRE DEL EVENTO</label>
+                <input class="admin-input" id="ev-name" placeholder="Eclipse Solar Total">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">TIPO</label>
+                <select class="admin-select" id="ev-type">
+                  <option value="eclipse">🌑 Eclipse</option>
+                  <option value="meteor">☄️ Meteoritos</option>
+                  <option value="planeta">🪐 Planeta</option>
+                  <option value="luna">🌕 Luna</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">DÍA</label>
+                <input class="admin-input" id="ev-day" placeholder="15" type="number" min="1" max="31">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">MES</label>
+                <select class="admin-select" id="ev-month">
+                  <option>ENE</option><option>FEB</option><option>MAR</option>
+                  <option>ABR</option><option>MAY</option><option selected>JUN</option>
+                  <option>JUL</option><option>AGO</option><option>SEP</option>
+                  <option>OCT</option><option>NOV</option><option>DIC</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">DESCRIPCIÓN</label>
+                <textarea class="admin-textarea" id="ev-desc" placeholder="Describe el evento..."></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">RAREZA</label>
+                <select class="admin-select" id="ev-badge">
+                  <option value="upcoming">Próximo</option>
+                  <option value="rare">Raro</option>
+                  <option value="monthly">Mensual</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-admin" onclick="addEvent()">+ AGREGAR EVENTO</button>
+          </div>
+        </div>
+
+        <!-- ADD QUESTION -->
+        <div class="admin-panel" id="ap-add-question">
+          <div class="admin-form">
+            <h4>❓ AGREGAR PREGUNTA AL QUIZ</h4>
+            <div class="form-row full">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">PREGUNTA</label>
+                <input class="admin-input" id="q-text" placeholder="¿Cuál es el planeta más grande del sistema solar?">
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">OPCIÓN A ✓ (CORRECTA)</label>
+                <input class="admin-input" id="q-a" placeholder="Respuesta correcta">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">OPCIÓN B</label>
+                <input class="admin-input" id="q-b" placeholder="Respuesta incorrecta">
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">OPCIÓN C</label>
+                <input class="admin-input" id="q-c" placeholder="Respuesta incorrecta">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">OPCIÓN D</label>
+                <input class="admin-input" id="q-d" placeholder="Respuesta incorrecta">
+              </div>
+            </div>
+            <div class="form-row full">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">EXPLICACIÓN (al responder)</label>
+                <textarea class="admin-textarea" id="q-explanation" placeholder="Explicación de la respuesta..."></textarea>
+              </div>
+            </div>
+            <button class="btn-admin" onclick="addQuestion()">+ AGREGAR PREGUNTA</button>
+          </div>
+          <div class="admin-form" style="margin-top:20px;">
+            <h4>📋 PREGUNTAS ACTUALES (<span id="q-count-label">0</span>)</h4>
+            <div id="questions-admin-list"></div>
+          </div>
+        </div>
+
+        <!-- ADD PRODUCT -->
+        <div class="admin-panel" id="ap-add-product">
+          <div class="admin-form">
+            <h4>📦 AGREGAR PRODUCTO</h4>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">NOMBRE</label>
+                <input class="admin-input" id="p-name" placeholder="Telescopio Refractor 70mm">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">PRECIO ($)</label>
+                <input class="admin-input" id="p-price" placeholder="299.99" type="number">
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">EMOJI</label>
+                <input class="admin-input" id="p-emoji" placeholder="🔭" style="width:100px;">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">CATEGORÍA</label>
+                <select class="admin-select" id="p-cat">
+                  <option value="telescopio">🔭 Telescopio</option>
+                  <option value="libro">📚 Libro</option>
+                  <option value="accesorio">⭐ Accesorio</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div>
+                <label style="font-size:11px;color:var(--text2);letter-spacing:1px;">DESCRIPCIÓN</label>
+                <textarea class="admin-textarea" id="p-desc" placeholder="Descripción del producto..."></textarea>
+              </div>
+            </div>
+            <button class="btn-admin" onclick="addProduct()">+ PUBLICAR PRODUCTO</button>
+          </div>
+        </div>
+
+        <!-- DELIVERIES -->
+        <div class="admin-panel" id="ap-deliveries">
+          <div class="deliveries-table" id="deliveries-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>TICKET #</th>
+                  <th>CLIENTE</th>
+                  <th>DIRECCIÓN</th>
+                  <th>TOTAL</th>
+                  <th>ESTADO</th>
+                  <th>ACCIÓN</th>
+                </tr>
+              </thead>
+              <tbody id="deliveries-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MANAGE USERS -->
+        <div class="admin-panel" id="ap-manage-users">
+          <div class="admin-form">
+            <h4>👤 INFORMACIÓN DE USUARIOS</h4>
+            <div id="users-list"></div>
+          </div>
+          <div class="admin-form" style="margin-top:20px;">
+            <h4>📊 ESTADÍSTICAS GLOBALES</h4>
+            <div id="global-stats-display" style="font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--text2); line-height:2.2;"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const CREDENTIALS = { user: {u:'cosmos', p:'cosmos123', name:'Explorador'}, admin: {u:'admin', p:'admin2024', name:'Admin'} };
+let currentRole = null;
+let currentLoginTab = 'user';
+
+// Persistent data
+let data = {
+  visits: 0,
+  articles: [],
+  events: [],
+  questions: [],
+  products: [],
+  orders: [],
+  activity: []
+};
+
+function loadData() {
+  const saved = localStorage.getItem('cosmos_data');
+  if (saved) { try { data = {...data, ...JSON.parse(saved)}; } catch(e){} }
+  if (!data.articles.length) initDefaultData();
+}
+
+function saveData() { localStorage.setItem('cosmos_data', JSON.stringify(data)); }
+
+function initDefaultData() {
+  data.articles = [
+    { id:1, title:'El Sistema Solar', icon:'☀️', cat:'planeta', summary:'Nuestro sistema solar alberga 8 planetas, millones de asteroides y cometas que orbitan el Sol.', content:'El Sol contiene el 99.86% de toda la masa del sistema solar. Los planetas se dividen en interiores (Mercurio, Venus, Tierra, Marte) y exteriores (Júpiter, Saturno, Urano, Neptuno). Júpiter es el más grande, con más de 1300 Tierras cabiendo en su interior. Saturno es famoso por sus anillos de hielo y polvo. La distancia del Sol a la Tierra es de aproximadamente 150 millones de km, una unidad astronómica (UA).'},
+    { id:2, title:'Agujeros Negros', icon:'🌑', cat:'fenomeno', summary:'Regiones del espacio-tiempo donde la gravedad es tan intensa que ni la luz puede escapar de ellas.', content:'Un agujero negro se forma cuando una estrella masiva colapsa bajo su propia gravedad. El radio de Schwarzschild define el "horizonte de eventos". En 2019, el Event Horizon Telescope capturó la primera imagen de un agujero negro. En el centro de casi todas las galaxias existe un agujero negro supermasivo, incluida nuestra Vía Láctea (Sagitario A*), con 4 millones de masas solares.'},
+    { id:3, title:'La Vía Láctea', icon:'🌌', cat:'galaxia', summary:'Nuestra galaxia espiral barrada con entre 100 y 400 mil millones de estrellas.', content:'La Vía Láctea tiene un diámetro de aproximadamente 100.000 años luz. El Sol se encuentra a unos 26.000 años luz del centro galáctico. Tarda unos 225 millones de años en completar una órbita alrededor del centro (un "año galáctico"). Las estrellas más antiguas de la Vía Láctea tienen aproximadamente 13.600 millones de años, casi tan viejas como el universo mismo.'},
+    { id:4, title:'Nebulosas', icon:'🌫️', cat:'objeto', summary:'Nubes de gas y polvo interestelar que son las "cunas" donde nacen las estrellas.', content:'Existen varios tipos de nebulosas: de emisión (emiten luz propia), de reflexión (reflejan luz de estrellas cercanas) y oscuras (absorben luz). La Nebulosa de Orión es visible a simple vista y es una fábrica activa de estrellas a 1.344 años luz. La Nebulosa del Cangrejo es el remanente de una supernova observada en 1054 d.C. por astrónomos chinos.'},
+    { id:5, title:'Exoplanetas', icon:'🪐', cat:'planeta', summary:'Planetas que orbitan estrellas fuera de nuestro sistema solar. Se han confirmado más de 5.500.', content:'Los exoplanetas se detectan principalmente por el método de tránsito (disminución del brillo de la estrella) y velocidad radial. TRAPPIST-1 es un sistema con 7 planetas similares a la Tierra, 3 en zona habitable. El James Webb Space Telescope ha revolucionado el estudio de atmósferas de exoplanetas. Kepler-22b fue uno de los primeros confirmados en zona habitable, a 620 años luz.'},
+    { id:6, title:'Fenómenos de Aurora', icon:'🌈', cat:'fenomeno', summary:'Las auroras boreales y australes son espectáculos de luz causados por partículas solares.', content:'Las auroras ocurren cuando partículas cargadas del viento solar interactúan con el campo magnético terrestre. Se producen principalmente en latitudes polares. Los colores dependen del gas y la altitud: el verde (oxígeno a 100 km) es el más común, el rojo (oxígeno a 200+ km) el más raro, el azul-violeta corresponde al nitrógeno. Las tormentas solares intensas pueden generar auroras visibles incluso en zonas tropicales.'}
+  ];
+  data.events = [
+    { id:1, name:'Lluvia de Meteoros Perseidas', type:'meteor', day:12, month:'AGO', desc:'La lluvia más famosa del año con hasta 100 meteoros por hora. Mejor observación después de medianoche.', badge:'upcoming'},
+    { id:2, name:'Eclipse Lunar Total', type:'eclipse', day:7, month:'SEP', desc:'La Luna entrará completamente en la sombra de la Tierra durante 84 minutos. Visible desde América del Sur.', badge:'rare'},
+    { id:3, name:'Conjunción Júpiter-Saturno', type:'planeta', day:21, month:'DIC', desc:'Los dos gigantes gaseosos aparecerán separados por menos de 0.1 grados, el más cercano evento desde 2020.', badge:'rare'},
+    { id:4, name:'Luna Llena de la Cosecha', type:'luna', day:18, month:'SEP', desc:'La luna llena más cercana al equinoccio de otoño, conocida como la Luna del Cazador.', badge:'monthly'},
+    { id:5, name:'Lluvia Leónidas', type:'meteor', day:17, month:'NOV', desc:'Hasta 15 meteoros por hora en condiciones óptimas. Se originan en el cometa Tempel-Tuttle.', badge:'upcoming'},
+    { id:6, name:'Oposición de Marte', type:'planeta', day:19, month:'ENE', desc:'Marte estará en su punto más brillante y cercano a la Tierra, perfecto para observación telescópica.', badge:'upcoming'},
+    { id:7, name:'Eclipse Solar Anular', type:'eclipse', day:26, month:'FEB', desc:'Un anillo de fuego visible desde Ecuador y norte de Brasil. Inicio del eclipse parcial a las 13:00.', badge:'rare'},
+    { id:8, name:'Tránsito de Mercurio', type:'planeta', day:9, month:'NOV', desc:'Mercurio cruzará el disco solar, visible con telescopio y filtro solar. Dura aproximadamente 5 horas.', badge:'rare'}
+  ];
+  data.questions = [
+    { id:1, text:'¿Cuál es el planeta más grande del sistema solar?', opts:['Júpiter','Saturno','Urano','Neptuno'], correct:0, explanation:'Júpiter es el planeta más grande, con una masa 2.5 veces mayor que todos los demás planetas juntos.'},
+    { id:2, text:'¿A cuántos años luz aproximadamente se encuentra la estrella más cercana al Sol?', opts:['1 año luz','4.2 años luz','10 años luz','100 años luz'], correct:1, explanation:'Próxima Centauri está a 4.24 años luz del Sol, siendo el sistema estelar más cercano al nuestro.'},
+    { id:3, text:'¿Cuántos planetas tiene nuestro Sistema Solar?', opts:['7','8','9','10'], correct:1, explanation:'Desde 2006, el Sistema Solar oficial tiene 8 planetas. Plutón fue reclasificado como planeta enano.'},
+    { id:4, text:'¿Qué es una nebulosa?', opts:['Una estrella muerta','Una nube de gas y polvo interestelar','Un agujero negro','Un planeta enano'], correct:1, explanation:'Las nebulosas son nubes de gas y polvo donde nacen las estrellas. Son las "guarderías estelares" del universo.'},
+    { id:5, text:'¿Cuál es el planeta más caliente del Sistema Solar?', opts:['Mercurio','Venus','Marte','Júpiter'], correct:1, explanation:'Venus es el más caliente (462°C promedio) gracias a su densa atmósfera con efecto invernadero extremo.'},
+    { id:6, text:'¿En qué galaxia se encuentra nuestro Sistema Solar?', opts:['Andrómeda','Triángulo','Vía Láctea','Gran Nube de Magallanes'], correct:2, explanation:'Nuestro Sol y sistema solar están en el Brazo de Orión de la galaxia Vía Láctea, a unos 26.000 años luz del centro.'},
+    { id:7, text:'¿Cuánto tarda la luz del Sol en llegar a la Tierra?', opts:['1 segundo','8 minutos','1 hora','1 día'], correct:1, explanation:'La luz viaja a 300.000 km/s y tarda aproximadamente 8 minutos y 20 segundos en recorrer los 150 millones de km hasta la Tierra.'},
+    { id:8, text:'¿Qué instrumento usó Galileo para estudiar el cielo?', opts:['Astrolabio','Telescopio','Sextante','Microscopio'], correct:1, explanation:'Galileo usó el telescopio en 1609 para observar las lunas de Júpiter, las fases de Venus y los cráteres de la Luna.'}
+  ];
+  data.products = [
+    { id:1, name:'Telescopio Refractor 70mm', emoji:'🔭', price:249.99, cat:'telescopio', desc:'Ideal para principiantes. 70mm de apertura, 300mm focal. Incluye 2 oculares y trípode ajustable.'},
+    { id:2, name:'Telescopio Reflector 130mm', emoji:'🔭', price:389.99, cat:'telescopio', desc:'Montaje ecuatorial motorizado. 130mm apertura, espejo parabólico. Perfecto para planetas y nebulosas.'},
+    { id:3, name:'Binoculares Astronómicos 10x50', emoji:'🔬', price:129.99, cat:'telescopio', desc:'10x ampliación, objetivo 50mm. Revestimiento óptico de alta calidad, impermeable.'},
+    { id:4, name:'Atlas del Cosmos', emoji:'📚', price:45.00, cat:'libro', desc:'800 páginas con mapas estelares detallados, fotografías del Hubble y datos de todos los objetos Messier.'},
+    { id:5, name:'Guía de Observación Nocturna', emoji:'📖', price:28.50, cat:'libro', desc:'Manual práctico para identificar constelaciones, planetas y objetos del cielo profundo a simple vista.'},
+    { id:6, name:'Mapa Estelar Giratorio (Planisferio)', emoji:'🗺️', price:18.00, cat:'accesorio', desc:'Planisferio para latitud -15° a -5° (Ecuador). 30cm diámetro, cartón laminado resistente.'},
+    { id:7, name:'Filtro Solar para Telescopio', emoji:'🌞', price:35.99, cat:'accesorio', desc:'Filtro de seguridad para observar el Sol. Compatible con telescopios de 60-80mm de apertura.'},
+    { id:8, name:'Linterna Roja Astronómica', emoji:'🔦', price:22.00, cat:'accesorio', desc:'Luz roja LED para preservar la visión nocturna durante la observación. 3 intensidades.'}
+  ];
+  data.visits = 0;
+  data.orders = [];
+  data.activity = [];
+  saveData();
+}
+
+// QUIZ STATE
+let quizState = { questions: [], current: 0, correct: 0, answers: [], active: false };
+let gameUnlocked = false;
+let gameActive = false;
+
+// CART
+let cart = [];
+
+// GAME
+let gameState = {};
+let animFrame = null;
+
+// ===== STARS BACKGROUND =====
+(function() {
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 220; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.8 + 0.2,
+        a: Math.random(),
+        speed: Math.random() * 0.4 + 0.05
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.a += s.speed * 0.01;
+      const alpha = (Math.sin(s.a) + 1) / 2 * 0.8 + 0.1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,224,255,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); draw();
+})();
+
+// ===== SOLAR SYSTEM MINI =====
+function buildSolarMini() {
+  const container = document.getElementById('solar-mini');
+  if (!container) return;
+  container.innerHTML = '<div class="sun"></div>';
+  const planets = [
+    { color:'#b5b5b5', size:8, r:60, dur:8 },
+    { color:'#e8c97a', size:10, r:90, dur:13 },
+    { color:'#4a9eff', size:12, r:120, dur:20 },
+    { color:'#e05050', size:9, r:155, dur:30 },
+    { color:'#c8a87a', size:22, r:200, dur:55 },
+    { color:'#d4b06a', size:18, r:240, dur:85 },
+    { color:'#7ecfdf', size:14, r:275, dur:120 },
+    { color:'#4a7abd', size:13, r:305, dur:170 },
+  ];
+  planets.forEach(p => {
+    const ring = document.createElement('div');
+    ring.className = 'orbit-ring';
+    ring.style.cssText = `width:${p.r*2}px; height:${p.r*2}px;`;
+    container.appendChild(ring);
+
+    const pl = document.createElement('div');
+    pl.className = 'planet-orb';
+    pl.style.cssText = `
+      width:${p.size}px; height:${p.size}px;
+      background: radial-gradient(circle at 35% 35%, white, ${p.color});
+      box-shadow: 0 0 ${p.size}px ${p.color}60;
+      --r: ${p.r}px;
+      animation-duration: ${p.dur}s;
+      top: calc(50% - ${p.size/2}px);
+      left: calc(50% - ${p.size/2}px);
+    `;
+    container.appendChild(pl);
+  });
+}
+
+// ===== LOGIN =====
+function setLoginTab(tab) {
+  currentLoginTab = tab;
+  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='user')||(i===1&&tab==='admin')));
+  clearLoginErrors();
+}
+
+function clearFieldError(id) {
+  document.getElementById(id).classList.remove('error');
+}
+
+function clearLoginErrors() {
+  ['login-user','login-pass'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('error');
+    const err = document.getElementById('err-'+id.replace('login-',''));
+    if (err) err.style.display = 'none';
+  });
+  document.getElementById('err-general').style.display = 'none';
+}
+
+function doLogin() {
+  clearLoginErrors();
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const creds = currentLoginTab === 'admin' ? CREDENTIALS.admin : CREDENTIALS.user;
+
+  let valid = true;
+  if (!u) { document.getElementById('login-user').classList.add('error'); document.getElementById('err-user').style.display='block'; valid=false; }
+  if (!p) { document.getElementById('login-pass').classList.add('error'); document.getElementById('err-pass').style.display='block'; valid=false; }
+  if (!valid) return;
+
+  if (u === creds.u && p === creds.p) {
+    currentRole = currentLoginTab;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('welcome-name').textContent = creds.name;
+    if (currentRole === 'admin') {
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display='');
+    }
+    data.visits++;
+    document.getElementById('visit-count').textContent = data.visits;
+    saveData();
+    logActivity(`Login: ${creds.name} (${currentRole})`);
+    buildSolarMini();
+    renderAll();
+    showToast('✅ Bienvenido, ' + creds.name + '!', 'success');
+  } else {
+    document.getElementById('login-user').classList.add('error');
+    document.getElementById('login-pass').classList.add('error');
+    document.getElementById('err-general').style.display = 'block';
+    showToast('🚫 Credenciales incorrectas', 'error');
+  }
+}
+
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  currentRole = null;
+  clearLoginErrors();
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; gameActive = false; }
+}
+
+// ===== SECTIONS =====
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const navBtns = document.querySelectorAll('.nav-btn');
+  navBtns.forEach(b => { if (b.textContent.toLowerCase().includes(id.substring(0,4))) b.classList.add('active'); });
+
+  if (id === 'quiz') renderQuiz();
+  if (id === 'game') renderGame();
+  if (id === 'shop') renderShop();
+  if (id === 'info') renderArticles();
+  if (id === 'events') renderEvents();
+  if (id === 'admin') renderAdmin();
+}
+
+// ===== RENDER ALL =====
+function renderAll() {
+  renderArticles();
+  renderEvents();
+  renderQuiz();
+  renderShop();
+  if (currentRole === 'admin') renderAdmin();
+  document.getElementById('visit-count').textContent = data.visits;
+}
+
+// ===== INFO =====
+let infoFilter = 'all';
+function filterArticles() { renderArticles(); }
+function filterChip(el, cat) {
+  document.querySelectorAll('#info-filters .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  infoFilter = cat;
+  renderArticles();
+}
+
+function renderArticles() {
+  const list = document.getElementById('articles-list');
+  if (!list) return;
+  const q = (document.getElementById('info-search')?.value || '').toLowerCase();
+  let arts = data.articles.filter(a => {
+    const matchCat = infoFilter === 'all' || a.cat === infoFilter;
+    const matchQ = !q || a.title.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  list.innerHTML = arts.length ? arts.map(a => `
+    <div class="info-article">
+      <h3>${a.icon || '⭐'} ${a.title} <span class="tag">${a.cat}</span></h3>
+      <p>${a.summary}</p>
+      ${a.content ? `
+        <div class="full-content" id="fc-${a.id}">${a.content}</div>
+        <button class="read-more" onclick="toggleRead(${a.id}, this)">▼ Leer más</button>
+      ` : ''}
+    </div>
+  `).join('') : '<div style="text-align:center;padding:40px;color:var(--text2);">No se encontraron artículos.</div>';
+}
+
+function toggleRead(id, btn) {
+  const el = document.getElementById('fc-'+id);
+  el.classList.toggle('open');
+  btn.textContent = el.classList.contains('open') ? '▲ Leer menos' : '▼ Leer más';
+}
+
+// ===== EVENTS =====
+let evFilter = 'all';
+function filterEvents(el, type) {
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  evFilter = type;
+  renderEvents();
+}
+
+function renderEvents() {
+  const list = document.getElementById('event-list');
+  if (!list) return;
+  const evs = data.events.filter(e => evFilter === 'all' || e.type === evFilter);
+  const badgeMap = { upcoming:'badge-upcoming', rare:'badge-rare', monthly:'badge-monthly' };
+  const badgeLabel = { upcoming:'PRÓXIMO', rare:'RARO ✨', monthly:'MENSUAL' };
+  list.innerHTML = evs.map(e => `
+    <div class="event-item" onclick="showModal('📅 ${e.name}','${e.desc}')">
+      <div class="event-date">
+        <div class="day">${e.day}</div>
+        <div class="month">${e.month}</div>
+      </div>
+      <div class="event-info">
+        <h4>${e.name}</h4>
+        <p>${e.desc}</p>
+      </div>
+      <div class="event-badge ${badgeMap[e.badge]||'badge-upcoming'}">${badgeLabel[e.badge]||'PRÓXIMO'}</div>
+    </div>
+  `).join('') || '<div style="text-align:center;padding:40px;color:var(--text2);">Sin eventos en esta categoría.</div>';
+}
+
+// ===== QUIZ =====
+function renderQuiz() {
+  const area = document.getElementById('quiz-area');
+  if (!area) return;
+  if (!quizState.active) startQuiz();
+}
+
+function startQuiz() {
+  const pool = [...data.questions].sort(() => Math.random() - 0.5).slice(0, 8);
+  quizState = { questions: pool, current: 0, correct: 0, answers: [], active: true };
+  renderQuizCard();
+}
+
+function renderQuizCard() {
+  const area = document.getElementById('quiz-area');
+  if (!area) return;
+  const { questions, current } = quizState;
+
+  if (current >= questions.length) {
+    showQuizResult();
+    return;
+  }
+
+  const q = questions[current];
+  const shuffled = q.opts.map((o, i) => ({ text: o, idx: i })).sort(() => Math.random() - 0.5);
+  const correctShuffled = shuffled.findIndex(o => o.idx === q.correct);
+
+  area.innerHTML = `
+    <div class="quiz-progress">
+      ${questions.map((_,i) => `<div class="quiz-dot ${i < current ? 'done' : i === current ? 'active' : ''}"></div>`).join('')}
+    </div>
+    <div class="quiz-card">
+      <div class="q-num">PREGUNTA ${current + 1} DE ${questions.length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="quiz-options">
+        ${shuffled.map((o, i) => `<button class="quiz-opt" onclick="answerQuiz(this, ${i}, ${correctShuffled}, ${q.id})" data-idx="${i}">${o.text}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb"></div>
+      <button class="quiz-next-btn" id="qnext" onclick="nextQuestion()">SIGUIENTE →</button>
+    </div>
+  `;
+}
+
+function answerQuiz(btn, chosen, correctIdx, qId) {
+  document.querySelectorAll('.quiz-opt').forEach(b => b.classList.add('disabled'));
+  const fb = document.getElementById('qfb');
+  const q = quizState.questions.find(x => x.id === qId);
+  const isCorrect = chosen === correctIdx;
+
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  document.querySelectorAll('.quiz-opt')[correctIdx].classList.add('correct');
+
+  fb.className = `quiz-feedback show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  fb.innerHTML = isCorrect
+    ? `✅ <b>¡Correcto!</b> ${q?.explanation || ''}`
+    : `❌ <b>Incorrecto.</b> ${q?.explanation || ''}`;
+
+  if (isCorrect) quizState.correct++;
+  document.getElementById('qnext').style.display = 'block';
+}
+
+function nextQuestion() {
+  quizState.current++;
+  renderQuizCard();
+}
+
+function showQuizResult() {
+  const { correct, questions } = quizState;
+  const area = document.getElementById('quiz-area');
+  const pct = Math.round(correct / questions.length * 100);
+  const unlocked = correct >= 4;
+
+  if (unlocked && !gameUnlocked) {
+    gameUnlocked = true;
+    document.getElementById('game-nav-btn').style.display = 'inline-block';
+    setTimeout(() => showModal('🎮 ¡JUEGO DESBLOQUEADO!', `¡Felicitaciones! Respondiste ${correct} preguntas correctamente. El Destructor de Asteroides ya está disponible en el menú.`), 600);
+    logActivity('Quiz completado — Juego desbloqueado');
+  }
+
+  area.innerHTML = `
+    <div class="score-display">
+      <div style="font-size:50px; margin-bottom:10px;">
+        ${correct >= 7 ? '🏆' : correct >= 4 ? '🌟' : '🌙'}
+      </div>
+      <h3 style="color:${correct >= 4 ? 'var(--success)' : 'var(--accent)'}">
+        ${correct >= 7 ? '¡EXPERTO ESPACIAL!' : correct >= 4 ? '¡BUEN TRABAJO!' : 'SIGUE INTENTANDO'}
+      </h3>
+      <div class="score-num">${correct}/${questions.length}</div>
+      <p style="color:var(--text2); margin:14px 0;">${pct}% de respuestas correctas</p>
+      ${unlocked ? `<p style="color:var(--success); font-size:14px; margin-bottom:16px;">🎮 ¡El juego está desbloqueado!</p>` : `<p style="color:var(--danger); font-size:13px; margin-bottom:16px;">Necesitas al menos 4 respuestas correctas (tuviste ${correct}).</p>`}
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn-primary" style="width:180px;" onclick="quizState.active=false; startQuiz();">🔄 REPETIR QUIZ</button>
+        ${unlocked ? `<button class="btn-outline" onclick="showSection('game')">🎮 IR AL JUEGO</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ===== GAME =====
+function renderGame() {
+  const sec = document.getElementById('sec-game');
+  const canvas = document.getElementById('planet-game-canvas');
+  const locked = document.getElementById('game-locked-msg');
+  if (!gameUnlocked) {
+    canvas.style.display = 'none';
+    document.querySelector('.game-hud').style.display = 'none';
+    locked.style.display = 'block';
+    return;
+  }
+  locked.style.display = 'none';
+  canvas.style.display = 'block';
+  document.querySelector('.game-hud').style.display = 'flex';
+  if (!gameActive) startGame();
+}
+
+function startGame() {
+  const canvas = document.getElementById('planet-game-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  document.getElementById('game-over').classList.remove('show');
+  document.getElementById('game-win').classList.remove('show');
+
+  const W = canvas.width, H = canvas.height;
+
+  gameState = {
+    score: 0, lives: 3, level: 1, wave: 0,
+    ship: { x: W/2, y: H-60, r: 16, angle: -Math.PI/2 },
+    bullets: [], asteroids: [], particles: [], powerups: [],
+    mouseX: W/2, mouseY: H/2,
+    lastShot: 0, shooting: false,
+    best: parseInt(localStorage.getItem('cosmos_best')||'0'),
+    planets: ['🌍','🪐','🔴','🟤','🔵','🟡'],
+    running: true
+  };
+
+  document.getElementById('g-best').textContent = gameState.best;
+  spawnWave();
+
+  canvas.onmousemove = e => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    gameState.mouseX = (e.clientX - rect.left) * scaleX;
+    gameState.mouseY = (e.clientY - rect.top) * scaleY;
+  };
+
+  canvas.onclick = () => { if (gameState.running) shootBullet(); };
+
+  document.onkeydown = e => {
+    if (e.code === 'Space' && document.getElementById('sec-game').classList.contains('active')) {
+      e.preventDefault();
+      if (gameState.running) shootBullet();
+    }
+  };
+
+  gameActive = true;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  gameLoop(ctx, W, H);
+}
+
+function spawnWave() {
+  const count = 4 + gameState.level * 2;
+  const W = 900, H = 480;
+  for (let i = 0; i < count; i++) {
+    const size = Math.random() * 28 + 18;
+    let x, y;
+    if (Math.random() < 0.5) {
+      x = Math.random() * W; y = Math.random() < 0.5 ? -size : H + size;
+    } else {
+      x = Math.random() < 0.5 ? -size : W + size; y = Math.random() * H;
+    }
+    const speed = (0.8 + Math.random() * 1.2) * (1 + gameState.level * 0.1);
+    const angle = Math.atan2(H/2 - y, W/2 - x) + (Math.random()-0.5)*0.8;
+    gameState.asteroids.push({
+      x, y, r: size, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+      rot: Math.random()*Math.PI*2, rotSpeed: (Math.random()-0.5)*0.05,
+      hp: size > 38 ? 3 : size > 28 ? 2 : 1,
+      emoji: gameState.planets[Math.floor(Math.random()*gameState.planets.length)],
+      type: Math.random() < 0.15 ? 'fast' : 'normal'
+    });
+  }
+}
+
+function shootBullet() {
+  const now = Date.now();
+  if (now - gameState.lastShot < 200) return;
+  gameState.lastShot = now;
+  const { ship } = gameState;
+  const angle = Math.atan2(gameState.mouseY - ship.y, gameState.mouseX - ship.x);
+  gameState.bullets.push({
+    x: ship.x, y: ship.y,
+    vx: Math.cos(angle) * 14, vy: Math.sin(angle) * 14,
+    r: 4, life: 80
+  });
+}
+
+function gameLoop(ctx, W, H) {
+  if (!gameState.running) return;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#000510';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw stars
+  for (let i = 0; i < 80; i++) {
+    const sx = (i * 137 + gameState.score * 0.1) % W;
+    const sy = (i * 97) % H;
+    ctx.beginPath(); ctx.arc(sx, sy, 1, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(200,224,255,${0.2+i%3*0.15})`; ctx.fill();
+  }
+
+  // Move ship toward mouse
+  const { ship } = gameState;
+  ship.x += (gameState.mouseX - ship.x) * 0.12;
+  ship.y += (gameState.mouseY - ship.y) * 0.12;
+  ship.x = Math.max(ship.r, Math.min(W-ship.r, ship.x));
+  ship.y = Math.max(ship.r, Math.min(H-ship.r, ship.y));
+  ship.angle = Math.atan2(gameState.mouseY - ship.y, gameState.mouseX - ship.x);
+
+  // Draw ship
+  ctx.save();
+  ctx.translate(ship.x, ship.y);
+  ctx.rotate(ship.angle + Math.PI/2);
+  ctx.shadowBlur = 20; ctx.shadowColor = '#4fc3f7';
+  ctx.fillStyle = '#4fc3f7';
+  ctx.beginPath();
+  ctx.moveTo(0, -ship.r); ctx.lineTo(-ship.r*0.7, ship.r*0.8); ctx.lineTo(0, ship.r*0.4); ctx.lineTo(ship.r*0.7, ship.r*0.8); ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Cursor crosshair
+  ctx.save();
+  ctx.strokeStyle = 'rgba(79,195,247,0.5)'; ctx.lineWidth = 1;
+  const mx = gameState.mouseX, my = gameState.mouseY;
+  ctx.beginPath(); ctx.moveTo(mx-12, my); ctx.lineTo(mx+12, my); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(mx, my-12); ctx.lineTo(mx, my+12); ctx.stroke();
+  ctx.beginPath(); ctx.arc(mx, my, 6, 0, Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // Bullets
+  gameState.bullets = gameState.bullets.filter(b => b.life > 0);
+  gameState.bullets.forEach(b => {
+    b.x += b.vx; b.y += b.vy; b.life--;
+    if (b.x < 0||b.x > W||b.y < 0||b.y > H) b.life = 0;
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+    ctx.fillStyle = '#ffd54f';
+    ctx.shadowBlur = 10; ctx.shadowColor = '#ffd54f';
+    ctx.fill(); ctx.shadowBlur = 0;
+  });
+
+  // Asteroids
+  gameState.asteroids.forEach((a, ai) => {
+    if (a.dead) return;
+    const speed = a.type === 'fast' ? 1.6 : 1;
+    a.x += a.vx * speed; a.y += a.vy * speed; a.rot += a.rotSpeed;
+
+    // Wrap around edges
+    if (a.x < -a.r*2) a.x = W+a.r;
+    if (a.x > W+a.r*2) a.x = -a.r;
+    if (a.y < -a.r*2) a.y = H+a.r;
+    if (a.y > H+a.r*2) a.y = -a.r;
+
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+    ctx.font = `${a.r*2}px serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (a.type === 'fast') { ctx.shadowBlur = 15; ctx.shadowColor = '#ff4d6d'; }
+    ctx.fillText(a.emoji, 0, 0);
+    ctx.restore();
+
+    // HP bar if damaged
+    if (a.hp > 1) {
+      const maxHp = a.r > 38 ? 3 : 2;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(a.x - a.r, a.y - a.r - 8, a.r*2, 4);
+      ctx.fillStyle = a.hp === maxHp ? '#4fc3f7' : '#ffd54f';
+      ctx.fillRect(a.x - a.r, a.y - a.r - 8, a.r*2*(a.hp/maxHp), 4);
+    }
+
+    // Bullet collisions
+    gameState.bullets.forEach(b => {
+      if (b.life <= 0) return;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      if (Math.sqrt(dx*dx+dy*dy) < a.r + b.r) {
+        b.life = 0; a.hp--;
+        spawnParticles(a.x, a.y, '#ffd54f', 6);
+        if (a.hp <= 0) {
+          a.dead = true;
+          const pts = a.r > 38 ? 30 : a.r > 28 ? 20 : 10;
+          gameState.score += pts * (a.type === 'fast' ? 2 : 1);
+          spawnParticles(a.x, a.y, a.type === 'fast' ? '#ff4d6d' : '#4fc3f7', 14);
+          // Split big asteroids
+          if (a.r > 30) {
+            for (let s = 0; s < 2; s++) {
+              const ang = Math.random() * Math.PI * 2;
+              const spd = 1.5 + Math.random();
+              gameState.asteroids.push({
+                x: a.x, y: a.y, r: a.r * 0.55,
+                vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
+                rot: 0, rotSpeed: (Math.random()-0.5)*0.1,
+                hp: 1, emoji: gameState.planets[Math.floor(Math.random()*gameState.planets.length)],
+                type: 'normal'
+              });
+            }
+          }
+        }
+      }
+    });
+
+    // Ship collision
+    if (!a.dead) {
+      const dx = ship.x - a.x, dy = ship.y - a.y;
+      if (Math.sqrt(dx*dx+dy*dy) < a.r + ship.r) {
+        a.dead = true; gameState.lives--;
+        spawnParticles(ship.x, ship.y, '#ff4d6d', 20);
+        if (gameState.lives <= 0) { endGame(); return; }
+      }
+    }
+  });
+
+  // Clean dead asteroids
+  gameState.asteroids = gameState.asteroids.filter(a => !a.dead);
+
+  // Next wave
+  if (gameState.asteroids.length === 0) {
+    gameState.level++;
+    gameState.score += 50 * gameState.level;
+    spawnWave();
+    document.getElementById('game-win').classList.add('show');
+    setTimeout(() => document.getElementById('game-win').classList.remove('show'), 1800);
+  }
+
+  // Particles
+  gameState.particles = gameState.particles.filter(p => p.life > 0);
+  gameState.particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.life--; p.vx *= 0.95; p.vy *= 0.95;
+    const alpha = p.life / p.maxLife;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r * alpha, 0, Math.PI*2);
+    ctx.fillStyle = p.color + Math.floor(alpha*255).toString(16).padStart(2,'0');
+    ctx.fill();
+  });
+
+  // HUD
+  document.getElementById('g-score').textContent = gameState.score;
+  document.getElementById('g-level').textContent = gameState.level;
+  document.getElementById('g-lives-text').textContent = '❤️'.repeat(gameState.lives);
+
+  if (gameState.score > gameState.best) {
+    gameState.best = gameState.score;
+    localStorage.setItem('cosmos_best', gameState.best);
+    document.getElementById('g-best').textContent = gameState.best;
+  }
+
+  animFrame = requestAnimationFrame(() => gameLoop(ctx, W, H));
+}
+
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const spd = Math.random() * 4 + 1;
+    const life = Math.floor(Math.random() * 20 + 15);
+    gameState.particles.push({
+      x, y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
+      r: Math.random()*3+1, life, maxLife: life, color
+    });
+  }
+}
+
+function endGame() {
+  gameState.running = false;
+  gameActive = false;
+  document.getElementById('final-score').textContent = gameState.score;
+  document.getElementById('game-over').classList.add('show');
+  logActivity(`Game Over — Puntaje: ${gameState.score}`);
+}
+
+// ===== SHOP =====
+let shopFilter = 'all';
+function filterShop(el, cat) {
+  document.querySelectorAll('#shop-filters .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  shopFilter = cat;
+  renderShop();
+}
+
+function renderShop() {
+  const grid = document.getElementById('products-grid');
+  if (!grid) return;
+  const prods = data.products.filter(p => shopFilter === 'all' || p.cat === shopFilter);
+  grid.innerHTML = prods.map(p => `
+    <div class="product-card">
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-info">
+        <h4>${p.name}</h4>
+        <p>${p.desc}</p>
+        <div class="product-footer">
+          <div class="price">$${p.price.toFixed(2)}<br><span>USD</span></div>
+          <button class="btn-add" onclick="addToCart(${p.id})">+ AGREGAR</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  renderCart();
+}
+
+function addToCart(id) {
+  const prod = data.products.find(p => p.id === id);
+  if (!prod) return;
+  const existing = cart.find(c => c.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...prod, qty: 1 });
+  updateCartBadge();
+  renderCart();
+  showToast(`🛒 ${prod.name} agregado al carrito`, 'success');
+}
+
+function updateCartBadge() {
+  const total = cart.reduce((s, c) => s + c.qty, 0);
+  const badge = document.getElementById('cart-badge-nav');
+  if (total > 0) { badge.style.display = 'inline-flex'; badge.textContent = total; }
+  else badge.style.display = 'none';
+}
+
+function renderCart() {
+  const panel = document.getElementById('cart-panel');
+  const list = document.getElementById('cart-items-list');
+  if (!panel || !list) return;
+  if (cart.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  list.innerHTML = cart.map(c => `
+    <div class="cart-item">
+      <div class="ci-name">${c.emoji} ${c.name}</div>
+      <div class="ci-qty">
+        <button onclick="changeQty(${c.id},-1)">−</button>
+        <span>${c.qty}</span>
+        <button onclick="changeQty(${c.id},1)">+</button>
+      </div>
+      <div class="ci-price">$${(c.price * c.qty).toFixed(2)}</div>
+    </div>
+  `).join('');
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  document.getElementById('cart-total').textContent = total.toFixed(2);
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(c => c.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+  updateCartBadge();
+  renderCart();
+}
+
+function showCheckout() {
+  if (cart.length === 0) { showToast('🛒 El carrito está vacío', 'error'); return; }
+  document.getElementById('shop-view').style.display = 'none';
+  document.getElementById('checkout-view').style.display = 'block';
+}
+
+function processOrder() {
+  const name = document.getElementById('ch-name').value.trim();
+  const phone = document.getElementById('ch-phone').value.trim();
+  const address = document.getElementById('ch-address').value.trim();
+  const city = document.getElementById('ch-city').value.trim();
+  const zip = document.getElementById('ch-zip').value.trim();
+  const email = document.getElementById('ch-email').value.trim();
+  const payment = document.getElementById('ch-payment').value;
+  const notes = document.getElementById('ch-notes').value.trim();
+
+  if (!name || !address || !city) { showToast('⚠️ Completa los campos obligatorios', 'error'); return; }
+
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const ticketId = 'COS-' + Date.now().toString(36).toUpperCase();
+  const order = {
+    id: ticketId, name, phone, address, city, zip, email, payment, notes,
+    items: [...cart], total, status: 'pending',
+    date: new Date().toLocaleString('es-EC')
+  };
+  data.orders.push(order);
+  logActivity(`Nuevo pedido: ${ticketId} — ${name} — $${total.toFixed(2)}`);
+  saveData();
+
+  cart = [];
+  updateCartBadge();
+
+  document.getElementById('checkout-view').style.display = 'none';
+  document.getElementById('shop-view').style.display = 'none';
+
+  const ticketView = document.getElementById('ticket-view');
+  ticketView.style.display = 'block';
+  ticketView.innerHTML = `
+    <div class="ticket">
+      <div class="ticket-id">${ticketId}</div>
+      <div class="ticket-date">Emitido: ${order.date}</div>
+      <div class="ticket-row"><span class="label">Cliente</span><span class="val">${name}</span></div>
+      <div class="ticket-row"><span class="label">Teléfono</span><span class="val">${phone || '—'}</span></div>
+      <div class="ticket-row"><span class="label">Dirección</span><span class="val">${address}, ${city} ${zip}</span></div>
+      <div class="ticket-row"><span class="label">Email</span><span class="val">${email || '—'}</span></div>
+      <div class="ticket-row"><span class="label">Pago</span><span class="val">${payment}</span></div>
+      ${order.items.map(i => `<div class="ticket-row"><span class="label">${i.emoji} ${i.name} x${i.qty}</span><span class="val">$${(i.price*i.qty).toFixed(2)}</span></div>`).join('')}
+      <div class="ticket-total"><span class="label">TOTAL</span><span class="val">$${total.toFixed(2)}</span></div>
+      ${notes ? `<div style="margin-top:14px; font-size:12px; color:var(--text2);">📝 ${notes}</div>` : ''}
+      <div class="ticket-status">✅ PEDIDO CONFIRMADO — EN PREPARACIÓN</div>
+    </div>
+    <div style="display:flex; gap:12px; margin:20px auto; justify-content:center; max-width:560px;">
+      <button class="btn-primary" style="flex:1;" onclick="newOrder()">🛒 NUEVA COMPRA</button>
+      <button class="btn-outline" onclick="window.print()">🖨️ IMPRIMIR</button>
+    </div>
+  `;
+
+  updateDeliveryBadge();
+  showToast('✅ ¡Pedido confirmado! Ticket: ' + ticketId, 'success');
+}
+
+function newOrder() {
+  document.getElementById('ticket-view').style.display = 'none';
+  document.getElementById('shop-view').style.display = 'block';
+}
+
+function updateDeliveryBadge() {
+  const pending = data.orders.filter(o => o.status === 'pending').length;
+  const badge = document.getElementById('delivery-count-badge');
+  if (badge) { if (pending > 0) { badge.style.display = 'inline-flex'; badge.textContent = pending; } else badge.style.display = 'none'; }
+}
+
+// ===== ADMIN =====
+function showAdminPanel(id) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-menu-item').forEach(m => m.classList.remove('active'));
+  document.getElementById('ap-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'deliveries') renderDeliveries();
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'add-question') renderQuestionsAdmin();
+  if (id === 'manage-users') renderUsersAdmin();
+}
+
+function renderAdmin() {
+  renderDashboard();
+  updateDeliveryBadge();
+}
+
+function renderDashboard() {
+  const statsEl = document.getElementById('admin-stats');
+  if (!statsEl) return;
+  const pending = data.orders.filter(o => o.status === 'pending').length;
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-val">${data.visits}</div><div class="stat-label">VISITAS</div></div>
+    <div class="stat-card"><div class="stat-val">${data.orders.length}</div><div class="stat-label">PEDIDOS</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent3)">${pending}</div><div class="stat-label">PENDIENTES</div></div>
+    <div class="stat-card"><div class="stat-val">${data.articles.length}</div><div class="stat-label">ARTÍCULOS</div></div>
+    <div class="stat-card"><div class="stat-val">${data.questions.length}</div><div class="stat-label">PREGUNTAS</div></div>
+    <div class="stat-card"><div class="stat-val">${data.products.length}</div><div class="stat-label">PRODUCTOS</div></div>
+  `;
+  const actEl = document.getElementById('activity-log');
+  if (actEl) {
+    actEl.innerHTML = (data.activity || []).slice(-8).reverse().map(a => `→ ${a}`).join('<br>') || '(Sin actividad registrada)';
+  }
+}
+
+function renderDeliveries() {
+  const tbody = document.getElementById('deliveries-tbody');
+  if (!tbody) return;
+  const statusMap = { pending:'st-pending', sent:'st-sent', delivered:'st-delivered' };
+  const statusLabel = { pending:'PENDIENTE', sent:'ENVIADO', delivered:'ENTREGADO' };
+  tbody.innerHTML = data.orders.length ? data.orders.map(o => `
+    <tr>
+      <td style="color:var(--accent); font-family:'Share Tech Mono',monospace;">${o.id}</td>
+      <td>${o.name}</td>
+      <td>${o.address}, ${o.city}</td>
+      <td style="color:var(--accent3);">$${o.total.toFixed(2)}</td>
+      <td><span class="status-tag ${statusMap[o.status]}">${statusLabel[o.status]}</span></td>
+      <td>
+        <button class="btn-status" onclick="advanceStatus('${o.id}')">→ Avanzar</button>
+      </td>
+    </tr>
+  `).join('') : '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text2);">No hay pedidos aún.</td></tr>';
+}
+
+function advanceStatus(id) {
+  const order = data.orders.find(o => o.id === id);
+  if (!order) return;
+  const states = ['pending','sent','delivered'];
+  const next = states[states.indexOf(order.status) + 1];
+  if (next) {
+    order.status = next;
+    saveData();
+    renderDeliveries();
+    updateDeliveryBadge();
+    showToast(`✅ Pedido ${id} → ${next.toUpperCase()}`, 'success');
+    logActivity(`Estado pedido ${id}: ${next}`);
+  }
+}
+
+function addArticle() {
+  const title = document.getElementById('ai-title').value.trim();
+  const cat = document.getElementById('ai-cat').value;
+  const icon = document.getElementById('ai-icon').value.trim() || '⭐';
+  const summary = document.getElementById('ai-summary').value.trim();
+  const content = document.getElementById('ai-content').value.trim();
+  if (!title || !summary) { showToast('⚠️ Completa título y resumen', 'error'); return; }
+  data.articles.push({ id: Date.now(), title, cat, icon, summary, content });
+  saveData(); logActivity(`Artículo agregado: "${title}"`);
+  document.getElementById('ai-title').value = '';
+  document.getElementById('ai-summary').value = '';
+  document.getElementById('ai-content').value = '';
+  document.getElementById('ai-icon').value = '';
+  showToast('✅ Artículo publicado exitosamente', 'success');
+}
+
+function addEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  const type = document.getElementById('ev-type').value;
+  const day = parseInt(document.getElementById('ev-day').value);
+  const month = document.getElementById('ev-month').value;
+  const desc = document.getElementById('ev-desc').value.trim();
+  const badge = document.getElementById('ev-badge').value;
+  if (!name || !day || !desc) { showToast('⚠️ Completa todos los campos', 'error'); return; }
+  data.events.push({ id: Date.now(), name, type, day, month, desc, badge });
+  saveData(); logActivity(`Evento agregado: "${name}"`);
+  document.getElementById('ev-name').value = '';
+  document.getElementById('ev-day').value = '';
+  document.getElementById('ev-desc').value = '';
+  showToast('✅ Evento agregado', 'success');
+}
+
+function addQuestion() {
+  const text = document.getElementById('q-text').value.trim();
+  const a = document.getElementById('q-a').value.trim();
+  const b = document.getElementById('q-b').value.trim();
+  const c = document.getElementById('q-c').value.trim();
+  const d = document.getElementById('q-d').value.trim();
+  const explanation = document.getElementById('q-explanation').value.trim();
+  if (!text || !a || !b) { showToast('⚠️ Completa la pregunta y al menos 2 opciones', 'error'); return; }
+  const opts = [a, b, c, d].filter(Boolean);
+  data.questions.push({ id: Date.now(), text, opts, correct: 0, explanation });
+  saveData(); logActivity(`Pregunta agregada: "${text.substring(0,40)}..."`);
+  ['q-text','q-a','q-b','q-c','q-d','q-explanation'].forEach(id => document.getElementById(id).value = '');
+  renderQuestionsAdmin();
+  showToast('✅ Pregunta agregada al quiz', 'success');
+}
+
+function renderQuestionsAdmin() {
+  const list = document.getElementById('questions-admin-list');
+  const count = document.getElementById('q-count-label');
+  if (!list) return;
+  if (count) count.textContent = data.questions.length;
+  list.innerHTML = data.questions.map((q, i) => `
+    <div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <span style="font-size:13px; color:var(--text2);">${i+1}. ${q.text}</span>
+      <button class="btn-status" style="color:var(--danger); border-color:rgba(255,77,109,0.3);" onclick="deleteQuestion(${q.id})">✕</button>
+    </div>
+  `).join('') || '<p style="color:var(--text2);padding:14px;">Sin preguntas aún.</p>';
+}
+
+function deleteQuestion(id) {
+  data.questions = data.questions.filter(q => q.id !== id);
+  saveData(); renderQuestionsAdmin();
+  showToast('🗑 Pregunta eliminada', 'success');
+}
+
+function addProduct() {
+  const name = document.getElementById('p-name').value.trim();
+  const price = parseFloat(document.getElementById('p-price').value);
+  const emoji = document.getElementById('p-emoji').value.trim() || '📦';
+  const cat = document.getElementById('p-cat').value;
+  const desc = document.getElementById('p-desc').value.trim();
+  if (!name || !price || !desc) { showToast('⚠️ Completa todos los campos', 'error'); return; }
+  data.products.push({ id: Date.now(), name, price, emoji, cat, desc });
+  saveData(); logActivity(`Producto agregado: "${name}"`);
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-price').value = '';
+  document.getElementById('p-emoji').value = '';
+  document.getElementById('p-desc').value = '';
+  showToast('✅ Producto publicado en la tienda', 'success');
+}
+
+function renderUsersAdmin() {
+  const el = document.getElementById('users-list');
+  const gs = document.getElementById('global-stats-display');
+  if (el) {
+    el.innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+        <div style="padding:16px; background:rgba(79,195,247,0.06); border:1px solid var(--border); border-radius:12px;">
+          <div style="font-family:'Orbitron',sans-serif; font-size:13px; color:var(--accent); margin-bottom:8px;">👤 USUARIO</div>
+          <div style="font-size:13px; color:var(--text2);">Login: cosmos / cosmos123</div>
+          <div style="font-size:12px; color:var(--text2);">Nombre: Explorador</div>
+          <div style="font-size:12px; color:var(--success); margin-top:6px;">● Activo</div>
+        </div>
+        <div style="padding:16px; background:rgba(167,139,250,0.06); border:1px solid var(--border); border-radius:12px;">
+          <div style="font-family:'Orbitron',sans-serif; font-size:13px; color:var(--accent2); margin-bottom:8px;">⚙️ ADMINISTRADOR</div>
+          <div style="font-size:13px; color:var(--text2);">Login: admin / admin2024</div>
+          <div style="font-size:12px; color:var(--text2);">Nombre: Admin</div>
+          <div style="font-size:12px; color:var(--success); margin-top:6px;">● Activo</div>
+        </div>
+      </div>
+    `;
+  }
+  if (gs) {
+    const total = data.orders.reduce((s, o) => s + o.total, 0);
+    gs.innerHTML = `
+      Visitas totales: ${data.visits}<br>
+      Artículos publicados: ${data.articles.length}<br>
+      Eventos programados: ${data.events.length}<br>
+      Preguntas en el Quiz: ${data.questions.length}<br>
+      Productos en tienda: ${data.products.length}<br>
+      Pedidos totales: ${data.orders.length}<br>
+      Ingresos totales: $${total.toFixed(2)}<br>
+    `;
+  }
+}
+
+// ===== UTILS =====
+function logActivity(msg) {
+  const now = new Date().toLocaleTimeString('es-EC');
+  if (!data.activity) data.activity = [];
+  data.activity.push(`[${now}] ${msg}`);
+  if (data.activity.length > 50) data.activity = data.activity.slice(-50);
+  saveData();
+}
+
+function showModal(title, body) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = body;
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('modal-ok').onclick = () => document.getElementById('modal-overlay').classList.remove('show');
+}
+
+let toastTimer;
+function showToast(msg, type='success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `toast show ${type}-toast`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+// ===== INIT =====
+loadData();
+document.getElementById('visit-count').textContent = data.visits;
+</script>
+</body>
+</html>
